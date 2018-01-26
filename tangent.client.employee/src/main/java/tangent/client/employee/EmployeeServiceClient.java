@@ -5,32 +5,22 @@
  */
 package tangent.client.employee;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import java.io.IOException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.jackson.JacksonFeature;
 import tangent.model.employee.domain.Employee;
-import tangent.model.employee.domain.Position;
+import tangent.model.employee.domain.EmployeeProfile;
 import tangent.model.employee.enums.DateRange;
 import tangent.model.employee.enums.Gender;
+import tangent.model.employee.enums.PositionEnum;
 import tangent.model.employee.enums.Race;
+import tangent.model.employee.exception.EmployeeServiceException;
 
 /**
  *
@@ -38,8 +28,8 @@ import tangent.model.employee.enums.Race;
  */
 public class EmployeeServiceClient {
     
-    private String urlTarget;
-    private String apiAuthenticationToken;
+    private final String urlTarget;
+    private final String apiAuthenticationToken;
     
     private static final String ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST = "employee";
     private static final String ENDPOINT_PATH_GET_LOGGED_IN_USER = ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST + "/me";
@@ -49,24 +39,25 @@ public class EmployeeServiceClient {
         this.apiAuthenticationToken = apiAuthenticationToken;
     }
     
-    public List<Employee> requestEmployeeList(){
-        Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
-                urlTarget, ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST, apiAuthenticationToken);
-        Response response = endpoint.get();
+    public List<Employee> requestEmployeeList() throws EmployeeServiceException{
         
-        List<Employee> employeeList = null;
+        Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
+                this.urlTarget, ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST, apiAuthenticationToken);
+        
+        Response response = endpoint.get();
         if(response != null){            
             int responseStatus = response.getStatus();
-            if(responseStatus == Response.Status.OK.getStatusCode() ){                
-                employeeList = response.readEntity(
-                        new GenericType<ArrayList<Employee>>(){});
+            if(responseStatus != Response.Status.OK.getStatusCode() ){
+                String errorMessage = "requestEmployeeList() failed";
+                throw new EmployeeServiceException(responseStatus, errorMessage);
             }
         }
+        List<Employee> employeeList = extractEmployeeList(response);
         return employeeList;
     }
     
-    public List<Employee> requestEmployeeList(Race race, Position position, DateRange startDateRange, String userId,
-            Gender gender, DateRange birthDateRange, String emailContains){
+    public List<Employee> requestEmployeeList(Race race, PositionEnum position, DateRange startDateRange, String userId,
+            Gender gender, DateRange birthDateRange, String emailContains) throws EmployeeServiceException{
         
         String path = ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST + "/?race=" + race
                 + "&position=" + position
@@ -75,35 +66,36 @@ public class EmployeeServiceClient {
                 + "&gender=" + gender
                 + "&birth_date_range=" + birthDateRange
                 + "&email__contains=" + emailContains;
+        
         Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
                 urlTarget, path, apiAuthenticationToken);
-        Response response = endpoint.get();
         
-        List<Employee> employeeList = null;
+        Response response = endpoint.get();        
         if(response != null){            
             int responseStatus = response.getStatus();
-            if(responseStatus == Response.Status.OK.getStatusCode() ){                
-                employeeList = response.readEntity(
-                        new GenericType<ArrayList<Employee>>(){});
+            if(responseStatus != Response.Status.OK.getStatusCode() ){
+                String errorMessage = "requestEmployeeList() failed";
+                throw new EmployeeServiceException(responseStatus, errorMessage);
             }
         }
+        List<Employee> employeeList = extractEmployeeList(response);
         return employeeList;
     }
     
-    public List<Employee> requestLoggedinUsersProfile(String apiAuthenticationToken){
+    public EmployeeProfile requestLoggedinUsersProfile(String apiAuthenticationToken){
         Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
                 urlTarget, ENDPOINT_PATH_GET_LOGGED_IN_USER, apiAuthenticationToken);
         Response response = endpoint.get();
         
-        List<Employee> employeeList = null;
+        EmployeeProfile employeeProfile = null;
         if(response != null){            
             int responseStatus = response.getStatus();
             if(responseStatus == Response.Status.OK.getStatusCode() ){                
-                employeeList = response.readEntity(
-                        new GenericType<ArrayList<Employee>>(){});
+                employeeProfile = response.readEntity(
+                        new GenericType<EmployeeProfile>(){});
             }
         }
-        return employeeList;
+        return employeeProfile;
     }
     
     public static void main(String args[]){
@@ -136,5 +128,18 @@ public class EmployeeServiceClient {
                 System.out.print("Status 9999: " + response.getStatus() );
             
         } 
+    }
+
+    private List<Employee> extractEmployeeList(Response response) {
+        
+        List<Employee> employeeList = null;
+        if(response != null){            
+            int responseStatus = response.getStatus();
+            if(responseStatus == Response.Status.OK.getStatusCode() ){                
+                employeeList = response.readEntity(
+                        new GenericType<ArrayList<Employee>>(){});
+            }
+        }
+        return employeeList;
     }
 }
