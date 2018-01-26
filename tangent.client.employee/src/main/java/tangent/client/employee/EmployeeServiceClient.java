@@ -27,6 +27,10 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import tangent.model.employee.domain.Employee;
+import tangent.model.employee.domain.Position;
+import tangent.model.employee.enums.DateRange;
+import tangent.model.employee.enums.Gender;
+import tangent.model.employee.enums.Race;
 
 /**
  *
@@ -34,70 +38,84 @@ import tangent.model.employee.domain.Employee;
  */
 public class EmployeeServiceClient {
     
+    private String urlTarget;
+    private String apiAuthenticationToken;
+    
+    private static final String ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST = "employee";
+    private static final String ENDPOINT_PATH_GET_LOGGED_IN_USER = ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST + "/me";
+    
+    public EmployeeServiceClient(String urlTarget, String apiAuthenticationToken){        
+        this.urlTarget = urlTarget;
+        this.apiAuthenticationToken = apiAuthenticationToken;
+    }
+    
+    public List<Employee> requestEmployeeList(){
+        Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
+                urlTarget, ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST, apiAuthenticationToken);
+        Response response = endpoint.get();
+        
+        List<Employee> employeeList = null;
+        if(response != null){            
+            int responseStatus = response.getStatus();
+            if(responseStatus == Response.Status.OK.getStatusCode() ){                
+                employeeList = response.readEntity(
+                        new GenericType<ArrayList<Employee>>(){});
+            }
+        }
+        return employeeList;
+    }
+    
+    public List<Employee> requestEmployeeList(Race race, Position position, DateRange startDateRange, String userId,
+            Gender gender, DateRange birthDateRange, String emailContains){
+        
+        String path = ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST + "/?race=" + race
+                + "&position=" + position
+                + "&start_date_range=" + startDateRange
+                + "&user=" + userId
+                + "&gender=" + gender
+                + "&birth_date_range=" + birthDateRange
+                + "&email__contains=" + emailContains;
+        Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
+                urlTarget, path, apiAuthenticationToken);
+        Response response = endpoint.get();
+        
+        List<Employee> employeeList = null;
+        if(response != null){            
+            int responseStatus = response.getStatus();
+            if(responseStatus == Response.Status.OK.getStatusCode() ){                
+                employeeList = response.readEntity(
+                        new GenericType<ArrayList<Employee>>(){});
+            }
+        }
+        return employeeList;
+    }
+    
+    public List<Employee> requestLoggedinUsersProfile(String apiAuthenticationToken){
+        Invocation.Builder endpoint = EndPointFactory.getServiceEndpoint(
+                urlTarget, ENDPOINT_PATH_GET_LOGGED_IN_USER, apiAuthenticationToken);
+        Response response = endpoint.get();
+        
+        List<Employee> employeeList = null;
+        if(response != null){            
+            int responseStatus = response.getStatus();
+            if(responseStatus == Response.Status.OK.getStatusCode() ){                
+                employeeList = response.readEntity(
+                        new GenericType<ArrayList<Employee>>(){});
+            }
+        }
+        return employeeList;
+    }
+    
     public static void main(String args[]){
         /**
          * GET_LOGGED_IN_USER http://staging.tangent.tngnt.co/api/user/me/ 
          * GET_ALL_EMPLOYEE_PROFILE_LIST http://staging.tangent.tngnt.co/api/employee/
+         * GET_LOGGED_IN_USER http://staging.tangent.tngnt.co/api/employee/me/
          * GET_FILTERED_EMPLOYEE_PROFILE_LIST /api/employee/?race=C&position=2&start_date_range=4&user=12&gender=M&birth_date_range=4&email__contains=prav
          * 
          * 
          */
-//        Client client = ClientBuilder.newClient();        
-//        
-//        Invocation.Builder invocationBuilder = client.target("http://staging.tangent.tngnt.co/api")
-//                .path("/employee")
-//                .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "pravin.gordhan")
-//                .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "pravin.gordhan")
-//                .request(MediaType.APPLICATION_JSON);
-//        Collection<COrder> readValues = new ObjectMapper().readValue(jsonAsString, new TypeReference<Collection<COrder>>() { });
-//        ClientConfig clientConfig = new ClientConfig();
-//
-//        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("pravin.gordhan", "pravin.gordhan");
-//        clientConfig.register( feature) ;
-//
-//        clientConfig.register(JacksonFeature.class);
-//
-//        Client client = ClientBuilder.newClient( clientConfig );
-//        WebTarget webTarget = client.target("http://staging.tangent.tngnt.co/api").path("employee");
-//
-//        Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_JSON);
-//        HttpAuthenticationFeature feature = HttpAuthenticationFeature.basicBuilder()
-//                                    .nonPreemptive()
-//                                    .credentials("pravin.gordhan", "pravin.gordhan")
-//                                    .build();
-// 
-//        final Client client = ClientBuilder.newClient();
-//        client.register(feature);
-//        WebTarget webTarget = client.target("http://staging.tangent.tngnt.co")
-//                .path("api/employee")
-//                .property("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-//        Invocation.Builder invocationBuilder =  webTarget.request(MediaType.APPLICATION_JSON);
-//        System.out.println("host3: " + webTarget.getUri().getHost() + ", path: " + webTarget.getUri().getPath());
-//        Response response = null;
-//        try{
-//            response = invocationBuilder.get();
-//            
-////            Employee[] employeeArray = invocationBuilder.get(Employee[].class);
-//            if(response != null){
-//                int status = response.getStatus();
-//                System.out.println("Status: " + status);
-//                if(response.getStatus() == Response.Status.OK.getStatusCode() ){                    
-//                    List<Employee> employeeList = response.readEntity(
-//                            new GenericType<List<Employee>>(){});
-//                }
-//            }  
-//
-//        int i = 0;
-//        }catch(Throwable e){
-//            e.printStackTrace();
-//        }
         Client client = ClientBuilder.newClient();
-        
-//        Invocation.Builder invocationBuilder = client.target("http://staging.tangent.tngnt.co/api/employee/")
-//                .path("me")
-//                .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, "pravin.gordhan")
-//                .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, "pravin.gordhan")
-//                .request(MediaType.APPLICATION_JSON);
         WebTarget webTarget = client.target("http://staging.tangent.tngnt.co/api")
                 .path("employee");
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON)
@@ -113,38 +131,10 @@ public class EmployeeServiceClient {
             
                 employeeList = response.readEntity(
                         new GenericType<ArrayList<Employee>>(){});
-            
-            if(response.getStatus() == Response.Status.OK.getStatusCode() ){ 
-                String jsonStr = response.readEntity(String.class);
-
-                //
                 
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode rootNode = null;
-                try {
-                    rootNode = mapper.readTree(jsonStr);
-                } catch (IOException ex) {
-                    Logger.getLogger(EmployeeServiceClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                if (rootNode instanceof ArrayNode) {
-                    try {
-                        Employee[] objects = mapper.readValue(rootNode.toString(), Employee[].class);
-                    } catch (IOException ex) {
-                        Logger.getLogger(EmployeeServiceClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else if (rootNode instanceof JsonNode) {
-                    try {
-                        Employee object = mapper.readValue(rootNode.toString(), Employee.class);
-                    } catch (IOException ex) {
-                        Logger.getLogger(EmployeeServiceClient.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    //
-                }
-            }
-        } 
         
-        System.out.print("Status 33333: " + response.getStatus() );
+                System.out.print("Status 9999: " + response.getStatus() );
+            
+        } 
     }
 }
