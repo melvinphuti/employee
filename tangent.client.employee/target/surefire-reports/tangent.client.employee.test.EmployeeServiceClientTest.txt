@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: tangent.client.employee.test.EmployeeServiceClientTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 3.221 sec
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 3, Time elapsed: 1.914 sec

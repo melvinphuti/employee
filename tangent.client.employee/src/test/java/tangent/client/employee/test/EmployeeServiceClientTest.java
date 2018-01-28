@@ -15,7 +15,7 @@ import tangent.model.employee.domain.EmployeeProfile;
 import tangent.model.employee.enums.DateRangeEnum;
 import tangent.model.employee.enums.GenderEnum;
 import tangent.model.employee.enums.PositionEnum;
-import tangent.model.employee.enums.Race;
+import tangent.model.employee.enums.RaceEnum;
 import tangent.model.employee.exception.EmployeeServiceException;
 
 /**
@@ -70,7 +70,7 @@ public class EmployeeServiceClientTest {
         try {
             PositionEnum position = PositionEnum.FRONT_END_DEVELOPER; ;
             String userId = ""; userId = null;
-            Race race = Race.WHITE; //race = null;
+            RaceEnum race = RaceEnum.WHITE; //race = null;
             DateRangeEnum startDateRange = DateRangeEnum.THIS_YEAR; startDateRange = null;
             GenderEnum gender = GenderEnum.FEMALE; gender = null;
             DateRangeEnum birthDateRange = DateRangeEnum.THIS_YEAR; birthDateRange = null;

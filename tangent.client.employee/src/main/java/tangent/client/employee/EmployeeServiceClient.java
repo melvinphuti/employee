@@ -18,7 +18,7 @@ import tangent.model.employee.domain.EmployeeProfile;
 import tangent.model.employee.enums.DateRangeEnum;
 import tangent.model.employee.enums.GenderEnum;
 import tangent.model.employee.enums.PositionEnum;
-import tangent.model.employee.enums.Race;
+import tangent.model.employee.enums.RaceEnum;
 import tangent.model.employee.exception.EmployeeServiceException;
 import tangent.model.employee.exception.EmployeeServiceExceptionEnum;
 
@@ -57,7 +57,7 @@ public class EmployeeServiceClient {
         return employeeList;
     }
     
-    public List<Employee> requestEmployeeList(Race race, PositionEnum position, DateRangeEnum startDateRange, String userId,
+    public List<Employee> requestEmployeeList(RaceEnum race, PositionEnum position, DateRangeEnum startDateRange, String userId,
             GenderEnum gender, DateRangeEnum birthDateRange, String emailContains) throws EmployeeServiceException{
         
         Map<String, String> queryParamMap = new HashMap<>();
