@@ -5,7 +5,15 @@
  */
 package tangent.client.employee.test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Response;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -27,7 +35,7 @@ public class EmployeeServiceClientTest {
     private static final String URL_TARGET = "http://staging.tangent.tngnt.co/api";
     private static final String API_AUTHENTICATION_TOKEN = "2a3d1af2f3f6d1cddaa3012c1c465fcbdffa3678";
     
-    
+    @Ignore
     @Test()
     public void testRequestEmployeeListWrongAuthenticationToken() {
 

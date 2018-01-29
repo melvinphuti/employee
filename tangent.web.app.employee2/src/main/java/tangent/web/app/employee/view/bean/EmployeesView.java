@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
@@ -33,23 +34,29 @@ public class EmployeesView implements Serializable {
     private EmployeeProfile employeeProfile;
     
     private final String URL_TARGET = "http://staging.tangent.tngnt.co/api";
-    private final String API_AUTHENTICATION_TOKEN = "2a3d1af2f3f6d1cddaa3012c1c465fcbdffa3678";
     private EmployeeServiceClient employeeServiceClient;
     private EmployeeListFilter employeeListFilter;
     private Statistics statistics;
-     
+
+    @ManagedProperty(value="#{webAppEmployeeLogin}")
+    private LoginBean loginBean;     
     @PostConstruct
     public void init() {
-        employeeListFilter = new EmployeeListFilter();
-        employeeServiceClient = new EmployeeServiceClient(URL_TARGET, API_AUTHENTICATION_TOKEN);
-        try {
-            employeeList = employeeServiceClient.requestEmployeeList();
-            employeeProfile = employeeServiceClient.requestLoggedinUsersProfile(API_AUTHENTICATION_TOKEN);
-            statistics = buildStatistics(employeeList);
-        } catch (EmployeeServiceException ex) {
-            String errorMessage = "Technical error occurred. Contact Admin for support.";
+        if(loginBean != null && loginBean.isIsAuthenticated() ){
+            employeeListFilter = new EmployeeListFilter();
+            employeeServiceClient = new EmployeeServiceClient(URL_TARGET, loginBean.getAuthenticationToken());
+            try {
+                employeeList = employeeServiceClient.requestEmployeeList();
+                employeeProfile = employeeServiceClient.requestLoggedinUsersProfile(loginBean.getAuthenticationToken());
+                statistics = buildStatistics(employeeList);
+            } catch (EmployeeServiceException ex) {
+                String errorMessage = "Technical error occurred. Contact Admin for support.";
+                FacesMessageUtil.addMessage(FacesMessage.SEVERITY_ERROR, errorMessage);
+                Logger.getLogger(EmployeesView.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            String errorMessage = "You are not logged in.";
             FacesMessageUtil.addMessage(FacesMessage.SEVERITY_ERROR, errorMessage);
-            Logger.getLogger(EmployeesView.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -218,6 +225,14 @@ public class EmployeesView implements Serializable {
 
     public Statistics getStatistics() {
         return statistics;
+    }
+
+    public LoginBean getLoginBean() {
+        return loginBean;
+    }
+
+    public void setLoginBean(LoginBean loginBean) {
+        this.loginBean = loginBean;
     }
             
 }

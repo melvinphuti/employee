@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+</h:head>
+<h:body>
+	<h1>Employee System</h1>
+	<h:form id="form">
+            
+            <p:growl id="growl" showDetail="true" />
+            <f:facet name="header">
+                <p:messages id="msgs" />
+            </f:facet>
+            <p:ajaxStatus style="display:block;margin-bottom:2em;height:24px;"  >
+
+                <f:facet name="start">
+                    <p:graphicImage name="ajaxloading.gif"/>
+                </f:facet>
+            </p:ajaxStatus>
+            <p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+            
+            <p:dialog widgetVar="statusDialog" modal="true" draggable="false" closable="false" resizable="false" showHeader="false">
+                <p:outputPanel>
+                    <h:outputLabel value="Processing...." />
+                </p:outputPanel>
+            </p:dialog>
+            
+            <p:fieldset toggleable="true">
+                <p:panelGrid columns="4">
+                    <p:fieldset legend="My Profile" toggleable="true">
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="Id Number: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.idNumber}"/>
+                            <p:outputLabel value="Firstname: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.user.firstName}"/>
+                            <p:outputLabel value="Lastame: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.user.lastName}"/>
+                        </p:panelGrid>
+                        <p:commandButton oncomplete="PF('myProfileDialog').show()" icon="ui-icon-search" title="My Profile">
+                           <f:setPropertyActionListener value="#{employee}" target="#{dtEmployeesView.selectedEmployee}" />
+                       </p:commandButton>
+                    </p:fieldset>
+                    <p:fieldset legend="Statistics" toggleable="true">
+                        <p:panelGrid columns="8">
+                            <p:outputLabel value="Number of Employees: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeList.size()}"/>
+                            <p:outputLabel value="Number Of Back End Developers: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfBackEndDevelopers}"/>
+                            <p:outputLabel value="Number Of Black Africans: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfBlackAfricans}"/>
+                            <p:outputLabel value="numberOfFemales: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfFemales}"/>
+                            <p:outputLabel value="numberOfFrontEndDevelopers: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfFrontEndDevelopers}"/>
+                            <p:outputLabel value="numberOfIndianOrAsians: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfIndianOrAsians}"/>
+                            <p:outputLabel value="numberOfJuniorProjectManagers: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfJuniorProjectManagers}"/>
+                            <p:outputLabel value="numberOfMales: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfMales}"/>
+                            <p:outputLabel value="numberOfNoneDominants: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfNoneDominants}"/>
+                            <p:outputLabel value="numberOfSeniorProjectManagers: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfSeniorProjectManagers}"/>
+                            <p:outputLabel value="numberOfWhites: "/>
+                            <p:outputLabel value="#{dtEmployeesView.statistics.numberOfWhites}"/>
+                        </p:panelGrid>
+                    </p:fieldset>
+                </p:panelGrid>
+            </p:fieldset>
+            <p:dataTable tableStyle="width:auto"
+                         id="employeeDT" 
+                         var="employee" 
+                         value="#{dtEmployeesView.employeeList}"
+                         rows="4"
+                         paginator="true"
+                         paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="4,8">
+                
+                <f:facet name="header">
+                    Employees
+                </f:facet>
+                <p:column filterBy="#{employee.user.id}" headerText="Firstname" footerText="exact" filterMatchMode="exact">
+                    <f:facet name="filter">
+                        <p:selectOneMenu valueChangeListener="#{dtEmployeesView.filterEmployeeListByUserId}">
+                            <p:ajax update="employeeDT" 
+                                    process="employeeDT"/>
+                            <f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{dtEmployeesView.userMap}" />
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{employee.user.username}" />
+                </p:column>
+                <p:column filterBy="#{employee.email}" headerText="e-mail" footerText="contains" filterMatchMode="contains">
+                    <h:outputText value="#{employee.email}" />
+                </p:column>
+                <p:column filterBy="#{employee.position}" headerText="Position" footerText="exact" filterMatchMode="exact">
+                    <f:facet name="filter">
+                        <p:selectOneMenu value="#{dtEmployeesView.employeeListFilter.position}"
+                                         valueChangeListener="#{dtEmployeesView.filterEmployeeList}">
+                            <p:ajax update="employeeDT" 
+                                    process="employeeDT"/>
+                            <f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{dtEmployeesView.employeeListFilter.positionList}" />
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{employee.position.name}" />
+                </p:column> 
+                <p:column filterBy="#{employee.gender}" headerText="Gender" footerText="exact" filterMatchMode="exact">
+                    <f:facet name="filter">
+                        <p:selectOneMenu value="#{dtEmployeesView.employeeListFilter.gender}"
+                                         valueChangeListener="#{dtEmployeesView.filterEmployeeList}">
+                            <p:ajax update="employeeDT, :form:growl" 
+                                    process="employeeDT"/>
+                            <f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{dtEmployeesView.employeeListFilter.genderList}" />
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{employee.genderDescription}" />
+                </p:column> 
+                <p:column filterBy="#{employee.race}" headerText="Race" footerText="exact" filterMatchMode="exact">
+                    <f:facet name="filter">
+                        <p:selectOneMenu value="#{dtEmployeesView.employeeListFilter.race}"
+                                         valueChangeListener="#{dtEmployeesView.filterEmployeeList}">
+                            <p:ajax update="employeeDT" 
+                                    process="employeeDT"/>
+                            <f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{dtEmployeesView.employeeListFilter.raceList}" />
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{employee.race}" />
+                </p:column>
+                <p:column filterBy="#{employee.daysToBirthday}" headerText="Days to Birthday" footerText="exact" filterMatchMode="exact">
+                    <f:facet name="filter">
+                        <p:selectOneMenu value="#{dtEmployeesView.employeeListFilter.birthDateRange}"
+                                         valueChangeListener="#{dtEmployeesView.filterEmployeeListByBirthDateRange}">
+                            <p:ajax update="employeeDT" 
+                                    process="employeeDT"/>
+                            <f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{dtEmployeesView.employeeListFilter.dateRangeList}" />
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{employee.daysToBirthday}" />
+                </p:column>
+                <p:column filterBy="#{employee.yearsWorked}" headerText="Years Worked" footerText="exact" filterMatchMode="exact">
+                    <f:facet name="filter">
+                        <p:selectOneMenu value="#{dtEmployeesView.employeeListFilter.startDateRange}"
+                                         valueChangeListener="#{dtEmployeesView.filterEmployeeListByStartDate}">
+                            <p:ajax update="employeeDT" 
+                                    process="employeeDT"/>
+                            <f:selectItem itemLabel="Select One" itemValue="#{null}" noSelectionOption="true" />
+                            <f:selectItems value="#{dtEmployeesView.employeeListFilter.dateRangeList}" />
+                        </p:selectOneMenu>
+                    </f:facet>
+                    <h:outputText value="#{employee.yearsWorked}" />
+                </p:column>
+                <p:column style="width:32px;text-align: center">
+                     <p:commandButton update=":form:employeeDetail" oncomplete="PF('employeeDialog').show()" icon="ui-icon-search" title="Employee">
+                        <f:setPropertyActionListener value="#{employee}" target="#{dtEmployeesView.selectedEmployee}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+            <p:dialog header="Employee Info" widgetVar="employeeDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                <p:outputPanel id="employeeDetail" style="text-align:center;">
+                    <p:panelGrid  columns="2" rendered="#{not empty dtEmployeesView.selectedEmployee}" columnClasses="label,value">
+                        <h:outputText value="gitHub user name:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.githubUser}" />
+
+                        <h:outputText value="email:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.email}" />
+
+                        <h:outputText value="Phone Number:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.phoneNumber}" />
+
+                        <h:outputText value="Birth Date" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.birthDate}">
+                            <f:convertDateTime type="date" pattern="dd-MM-yyyy"/>
+                        </h:outputText>
+                        
+                        <h:outputText value="Gender:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.gender}" />
+                        
+                        <h:outputText value="Race:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.race}" />
+                        
+                        <h:outputText value="Years Worked:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.yearsWorked}" />
+                        
+                        <h:outputText value="Age:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.age}" />
+                        
+                        <h:outputText value="Days to Birthday:" />
+                        <h:outputText value="#{dtEmployeesView.selectedEmployee.daysToBirthday}" />
+                    </p:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+            
+            <p:dialog header="My Profile" widgetVar="myProfileDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+                <p:outputPanel id="employeeDetailPanel" style="text-align:center;">
+                    
+                        <p:panelGrid columns="2">
+                            <p:outputLabel value="Id Number: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.idNumber}"/>
+                            <p:outputLabel value="Firstname: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.user.firstName}"/>
+                            <p:outputLabel value="Lastame: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.user.lastName}"/>
+                            
+                            
+                            <p:outputLabel value="e-mail: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.user.email}"/>
+                            <p:outputLabel value="Gender: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.genderDescription}"/>
+                            <p:outputLabel value="github User: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.githubUser}"/>
+                            <p:outputLabel value="Leave Remaining: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.leaveRemaining}"/>
+                            <p:outputLabel value="Personal Email: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.personalEmail}"/>
+                            <p:outputLabel value="Phone Number: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.phoneNumber}"/>
+                            <p:outputLabel value="Physical Address: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.physicalAddress}"/>
+                            <p:outputLabel value="Tax Number: "/>
+                            <p:outputLabel value="#{dtEmployeesView.employeeProfile.taxNumber}"/>
+                            <p:outputLabel value="Next Review: "/>
+                        </p:panelGrid>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+</h:body>
+</html>

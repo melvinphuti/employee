@@ -10,8 +10,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import tangent.model.employee.domain.Employee;
 import tangent.model.employee.domain.EmployeeProfile;
@@ -31,12 +37,46 @@ public class EmployeeServiceClient {
     private final String urlTarget;
     private final String apiAuthenticationToken;
     
-    private static final String ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST = "employee";
-    private static final String ENDPOINT_PATH_GET_LOGGED_IN_USER = ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST + "/me";
+    private final String ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST = "employee";
+    private final String ENDPOINT_PATH_GET_LOGGED_IN_USER = ENDPOINT_PATH_GET_ALL_EMPLOYEE_PROFILE_LIST + "/me";
     
     public EmployeeServiceClient(String urlTarget, String apiAuthenticationToken){        
         this.urlTarget = urlTarget;
         this.apiAuthenticationToken = apiAuthenticationToken;
+    }
+    
+    public EmployeeServiceClient(String urlTarget){        
+        this.urlTarget = urlTarget;
+        this.apiAuthenticationToken = null;
+    }
+    
+    public String requestAuthenticationToken(String username, String password) throws EmployeeServiceException{
+        Client client = ClientBuilder.newClient();
+        WebTarget webTarget = client.target("http://staging.tangent.tngnt.co/").path("api-token-auth/");
+
+        Form form = new Form().param("username", username)
+              .param("password", password);
+        Response response = webTarget.request(MediaType.APPLICATION_JSON).post(Entity.form(form));
+        String token = null;
+        if(response != null){            
+            int responseStatus = response.getStatus();
+            if(responseStatus != Response.Status.OK.getStatusCode() ){
+                String errorMessage = "requestAuthenticationToken() failed due to responseStatus=["
+                        + responseStatus + "], responseErrorReason=[" + response.getStatusInfo().getReasonPhrase();
+                throw new EmployeeServiceException(EmployeeServiceExceptionEnum.SERVICE_ERROR, errorMessage);
+            }else{
+                try{
+                    Map<String, String> responseMap = response.readEntity(
+                                   new GenericType<Map<String, String>>(){}); 
+                    token = responseMap.get("token");
+                }catch(ProcessingException ps){
+                    String errorMessage = "errorMessage=[" + ps.getMessage() + "], cause=[" +
+                            ps.getCause().getMessage() + "].";
+                    throw new EmployeeServiceException(EmployeeServiceExceptionEnum.PROCESSING_ERROR, errorMessage);
+                }
+            }
+        }
+        return token;
     }
     
     public List<Employee> requestEmployeeList() throws EmployeeServiceException{
