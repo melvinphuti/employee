@@ -82,5 +82,17 @@ public class EmployeeListFilter implements Serializable{
     
     public GenderEnum[] getGenderList(){
         return GenderEnum.values();
-    }    
+    } 
+    
+    public RaceEnum[] getRaceList(){
+        return RaceEnum.values();
+    } 
+    
+    public PositionEnum[] getPositionList(){
+        return PositionEnum.values();
+    } 
+    public DateRangeEnum[] getDateRangeList(){
+        return DateRangeEnum.values();
+    }
+    
 }
